@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Token Launch Radar</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <h1>Token Launch Radar</h1>
+    <p class="tagline">Every protocol that records no token, ranked by what its token would be worth.</p>
+  </div>
+  <p class="meta" id="meta">Loading the snapshot&hellip;</p>
+  <nav class="tabs" id="tabs">
+    <a href="#/" data-view="board">Board</a>
+    <a href="#/live" data-view="live">Live tokens</a>
+    <a href="#/model" data-view="model">How the model works</a>
+  </nav>
+</header>
+
+<main>
+  <section id="view-board" class="view">
+    <div class="controls">
+      <label class="ctl">Search
+        <input id="q" type="search" placeholder="Protocol name or slug" autocomplete="off">
+      </label>
+      <label class="ctl">Category
+        <select id="category"><option value="">All categories</option></select>
+      </label>
+      <label class="ctl">Chain
+        <select id="chain"><option value="">All chains</option></select>
+      </label>
+      <label class="ctl check"><input id="watchlist" type="checkbox"> Watchlist only</label>
+      <label class="ctl">Sort by
+        <select id="sort">
+          <option value="rank">Rank (implied value)</option>
+          <option value="tvl">TVL</option>
+          <option value="growth">7-day growth</option>
+          <option value="age">Age (days listed)</option>
+        </select>
+      </label>
+    </div>
+    <p class="count" id="count"></p>
+    <div class="tablewrap">
+      <table id="board">
+        <thead>
+          <tr>
+            <th data-sort="rank">#</th>
+            <th data-sort="rank">Protocol</th>
+            <th>Category</th>
+            <th>Chains</th>
+            <th data-sort="tvl">TVL</th>
+            <th data-sort="growth">7d</th>
+            <th data-sort="age">Age</th>
+            <th data-sort="rank">Implied value</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <p class="hint">Click a row for the protocol&rsquo;s detail view and farm plan. Implied value is this radar&rsquo;s own claim, never the market&rsquo;s: the board states what a token would be worth if the protocol&rsquo;s record stayed as it is.</p>
+  </section>
+
+  <section id="view-detail" class="view" hidden>
+    <p><a href="#/" class="back">&larr; Back to the board</a></p>
+    <div id="detail"></div>
+  </section>
+
+  <section id="view-live" class="view" hidden>
+    <p class="lede">These protocols already have a token that trades, so the radar shows the market&rsquo;s own value for them &mdash; market cap, not a model&rsquo;s claim. They are kept apart from the ranked board on purpose.</p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Protocol</th><th>Category</th><th>Chains</th><th>TVL</th><th>Market cap</th><th>7d</th></tr></thead>
+        <tbody id="live-rows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="view-model" class="view" hidden>
+    <h2>How the model works</h2>
+    <p class="lede">Model <strong id="model-version">radar-2</strong> scores every protocol from the snapshot&rsquo;s own figures only. No protocol name is ever special-cased: the same function scores every row.</p>
+    <div class="formula">
+      <p><strong>implied value</strong> = TVL &times; category multiple &times; growth &times; maturity &times; breadth</p>
+      <ul>
+        <li><strong>Category multiple</strong> &mdash; the median market-cap-to-TVL ratio of this snapshot&rsquo;s own live-token protocols in the same category (at least 3 of them, else the global median), clamped to 0.05&ndash;1.50. The live market is the yardstick.</li>
+        <li><strong>Growth</strong> &mdash; 1 + clamped 7-day TVL change (&minus;50% to +100%) &times; 0.6.</li>
+        <li><strong>Maturity</strong> &mdash; 0.7 + 0.3 &times; days listed (capped at 1,460); a protocol with no listing date counts as 365 days.</li>
+        <li><strong>Breadth</strong> &mdash; 1 + 0.02 per extra chain, up to 5 extra chains.</li>
+      </ul>
+    </div>
+    <h3>Category multiples, calibrated from this snapshot</h3>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Category</th><th>Multiple</th><th>Live protocols sampled</th></tr></thead>
+        <tbody id="multiples"></tbody>
+      </table>
+    </div>
+    <h3>What the board leaves out, and why</h3>
+    <p class="lede">Wrapped, staked and bridged products of a token that already trades are not tokens still to come, so the board never ranks them as pre-token &mdash; even when the snapshot records no token for them. Versioned pools and exchanges are left out the same way. A protocol is called pre-token only in the sense that it <em>records no token</em>; the snapshot&rsquo;s record is not proof it has none.</p>
+  </section>
+</main>
+
+<footer>
+  <p>Source: DefiLlama protocols snapshot, <span id="asof"></span>. The watchlist is the floor, never the ceiling: the board ranks every rankable pre-token protocol, below the floor included.</p>
+</footer>
+<script src="../data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
